@@ -5,11 +5,15 @@ import static java.util.stream.Collectors.toSet;
 import com.nata.blue.model.User;
 import com.nata.blue.model.UserFilter;
 import java.security.InvalidParameterException;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +25,11 @@ public class UserService {
 
     public @Nullable User get(long id) {
         return getUserOrThrow(id);
+    }
+
+    public Page<User> getPage(@NonNull UserFilter filter, Pageable pageable) {
+        List<User> filtered = getUsers(filter, null, null).stream().toList();
+        return new PageImpl<>(filtered, pageable, filtered.size());
     }
 
     public Set<User> getUsers(@NonNull UserFilter filter, @Nullable Integer page, @Nullable Integer pageSize) {

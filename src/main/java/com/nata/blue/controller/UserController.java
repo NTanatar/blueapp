@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,8 +40,12 @@ public class UserController {
     public Set<User> getUsers(UserFilter filter, Integer page, Integer pageSize) {
         return userService.getUsers(filter, page, pageSize);
     }
-    // return Page<User> or
-    // in headers
+
+    @GetMapping("page")
+    @Operation(summary = "Get page of users", description = "Retrieves a page of users by filters")
+    public Page<User> getPage(UserFilter filter, Pageable pageable) {
+        return userService.getPage(filter, pageable);
+    }
 
     @PostMapping
     @Operation(summary = "Create a user")
