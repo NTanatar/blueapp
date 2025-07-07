@@ -1,6 +1,6 @@
 package com.nata.blue.service;
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.Comparator.comparing;
 
 import com.nata.blue.model.User;
 import com.nata.blue.model.UserFilter;
@@ -8,7 +8,6 @@ import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
@@ -27,24 +26,22 @@ public class UserService {
         return getUserOrThrow(id);
     }
 
-    public Page<User> getPage(@NonNull UserFilter filter, Pageable pageable) {
-        List<User> filtered = getUsers(filter, null, null).stream().toList();
-        return new PageImpl<>(filtered, pageable, filtered.size());
-    }
+    public Page<User> getPage(@NonNull UserFilter filter, @NonNull Pageable pageable) {
+        validate(pageable.getPageNumber(), pageable.getPageSize());
 
-    public Set<User> getUsers(@NonNull UserFilter filter, @Nullable Integer page, @Nullable Integer pageSize) {
-        validate(page, pageSize);
-
-        if (page == null) {
-            return users.values().stream()
-                .filter(filter::test)
-                .collect(toSet());
-        }
-        return users.values().stream()
+        List<User> filtered = users.values().stream()
             .filter(filter::test)
-            .skip((long) page * pageSize)
-            .limit(pageSize)
-            .collect(toSet());
+            .sorted(comparing(User::getId))
+            .toList();
+
+        if (filtered.isEmpty() || pageable.isUnpaged()) {
+            return new PageImpl<>(filtered);
+        }
+        List<User> paged = filtered.stream()
+            .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+            .limit(pageable.getPageSize())
+            .toList();
+        return new PageImpl<>(paged, pageable, filtered.size());
     }
 
     public User create(@NonNull User user) {

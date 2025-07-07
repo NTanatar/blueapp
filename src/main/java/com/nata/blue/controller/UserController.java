@@ -7,7 +7,6 @@ import com.nata.blue.model.UserFilter;
 import com.nata.blue.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,13 +35,7 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all users", description = "Retrieves a list of users by filters")
-    public Set<User> getUsers(UserFilter filter, Integer page, Integer pageSize) {
-        return userService.getUsers(filter, page, pageSize);
-    }
-
-    @GetMapping("page")
-    @Operation(summary = "Get page of users", description = "Retrieves a page of users by filters")
+    @Operation(summary = "Get page of users", description = "Retrieves a page of users by filters, sorted by id")
     public Page<User> getPage(UserFilter filter, Pageable pageable) {
         return userService.getPage(filter, pageable);
     }
